@@ -1,0 +1,34 @@
+# Dependências
+/node_modules
+/package-lock.json
+
+# Diretórios de Build e Saída
+/build
+/dist
+/out
+/coverage
+
+# Logs e Cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.cache
+
+# Variáveis de Ambiente e Arquivos de Configuração Local
+# ESTE É MUITO IMPORTANTE para chaves secretas/credenciais
+.env
+.env.local
+.env.*.local
+
+# IDEs e Ferramentas
+.vscode/* # Arquivos de configuração específicos do VS Code
+!.vscode/settings.json # Manter configurações se você usar o settings.json no repositório
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/      # Arquivos do WebStorm/IntelliJ
+*.iml       # Arquivos do IntelliJ
+
+# Arquivos temporários
+*.tmp

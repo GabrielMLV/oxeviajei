@@ -1,0 +1,20 @@
+/* Variáveis de Cor Primária Personalizadas */
+:root {
+  /* Cor principal: #3f068a */
+  --bs-primary: #3f068a;
+  --bs-primary-rgb: 63, 6, 138; /* RGB para cálculo de transparência */
+  
+  /* Cor de contraste (para botões, links, etc.) */
+  --bs-link-color: #3f068a;
+  
+  /* Cor secundária (útil para tons mais claros da cor primária) */
+  --bs-secondary: #5a11c9;
+}
+
+/* Ajustes para Botões de Contorno (Outline) */
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+}

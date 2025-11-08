@@ -10,8 +10,11 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "firebase": "^10.7.0",
+    "font-awesome": "^4.7.0",
     "react": "^18.2.0",
+    "react-currency-input-field": "^4.0.3",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.21.0",
     "react-toastify": "^11.0.5",
     "sweetalert2": "^11.26.3"

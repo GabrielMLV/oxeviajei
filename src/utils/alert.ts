@@ -1,15 +1,19 @@
-import Swal, { SweetAlertIcon } from 'sweetalert2';
+import Swal, { SweetAlertIcon } from "sweetalert2";
 
 /**
  * Mostra um alerta genérico.
  */
-export const alerta = (title: string, text?: string, icon: SweetAlertIcon = 'info') => {
+export const alerta = (
+  title: string,
+  text?: string,
+  icon: SweetAlertIcon = "info"
+) => {
   return Swal.fire({
     icon,
     title,
     text,
-    confirmButtonColor: '#3085d6',
-    confirmButtonText: 'OK',
+    confirmButtonColor: "#3085d6",
+    confirmButtonText: "OK",
   });
 };
 
@@ -18,10 +22,10 @@ export const alerta = (title: string, text?: string, icon: SweetAlertIcon = 'inf
  */
 export const alertaSucesso = (message: string) => {
   return Swal.fire({
-    icon: 'success',
-    title: 'Sucesso!',
+    icon: "success",
+    title: "Sucesso!",
     text: message,
-    confirmButtonColor: '#28a745',
+    confirmButtonColor: "#28a745",
   });
 };
 
@@ -30,10 +34,10 @@ export const alertaSucesso = (message: string) => {
  */
 export const alertaErro = (message: string) => {
   return Swal.fire({
-    icon: 'error',
-    title: 'Oops...',
+    icon: "error",
+    title: "Oops...",
     text: message,
-    confirmButtonColor: '#dc3545',
+    confirmButtonColor: "#dc3545",
   });
 };
 
@@ -42,14 +46,14 @@ export const alertaErro = (message: string) => {
  */
 export const alertarConfirmar = async (message: string): Promise<boolean> => {
   const result = await Swal.fire({
-    title: 'Confirmação',
+    title: "Confirmação",
     text: message,
-    icon: 'question',
+    icon: "question",
     showCancelButton: true,
-    confirmButtonText: 'Sim',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#aaa',
+    confirmButtonText: "Sim",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#aaa",
   });
   return result.isConfirmed;
 };
@@ -57,15 +61,19 @@ export const alertarConfirmar = async (message: string): Promise<boolean> => {
 /**
  * Mostra um prompt numérico (ex: valor a pagar)
  */
-export const pagarValorAlerta = async (title: string, label?: string, initialValue = 0) => {
+export const pagarValorAlerta = async (
+  title: string,
+  label?: string,
+  initialValue = 0
+) => {
   const { value } = await Swal.fire({
     title,
-    input: 'number',
-    inputLabel: label || '',
+    input: "number",
+    inputLabel: label || "",
     inputValue: initialValue,
     showCancelButton: true,
-    confirmButtonText: 'Confirmar',
-    cancelButtonText: 'Cancelar',
+    confirmButtonText: "Confirmar",
+    cancelButtonText: "Cancelar",
   });
   return value ? Number(value) : null;
 };

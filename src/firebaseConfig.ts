@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Replace with your Firebase config
 const firebaseConfig = {
@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket: "oxeviajei-71faa.firebasestorage.app",
   messagingSenderId: "753845230451",
   appId: "1:753845230451:web:27d43308ad43be4c680306",
-  measurementId: "G-S9NR04K2N9"
+  measurementId: "G-S9NR04K2N9",
 };
 
 const app = initializeApp(firebaseConfig);
