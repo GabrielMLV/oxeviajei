@@ -25,7 +25,7 @@ function NavBar() {
             src={"/logo.png"}
             alt="OxeViajei Logo"
             className="rounded-circle me-2"
-            style={{ width: 45, height: 45 }}
+            style={{ width: 60, height: 45 }}
           />
           <h1 className="m-0 fs-4 fw-bold text-primary">OxeViajei</h1>
         </div>

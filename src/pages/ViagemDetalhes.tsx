@@ -24,13 +24,15 @@ import {
   FaUserCircle,
   FaPlane,
   FaRoute,
+  FaInfoCircle,
 } from "react-icons/fa"; // Exemplo de uso de ícones (React Icons)
+import { formatarMoeda } from "../utils/types";
 
 export default function ViagemDetalhes() {
   const { id } = useParams();
   const viagemId = id as string;
   const [viagem, setViagem] = useState<any>(null);
-  const [contas, setContas] = useState<any[]>([]);
+  const [despesas, setDespesas] = useState<any[]>([]);
   const [titulo, setTitulo] = useState("");
   const [valor, setValor] = useState(0);
   const { user } = useAuth();
@@ -43,7 +45,6 @@ export default function ViagemDetalhes() {
     });
   };
 
-  // 🔹 Carrega viagem e contas
   useEffect(() => {
     if (!viagemId) return;
 
@@ -53,22 +54,21 @@ export default function ViagemDetalhes() {
       if (snap.exists()) setViagem({ id: snap.id, ...snap.data() });
     });
 
-    // Observar contas em tempo real
-    const q = query(collection(db, `viagens/${viagemId}/contas`));
+    const q = query(collection(db, `viagens/${viagemId}/despesas`));
     const unsub = onSnapshot(q, (snap) =>
-      setContas(snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })))
+      setDespesas(snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })))
     );
     return () => unsub();
   }, [viagemId]);
 
-  const criarConta = async () => {
+  const criarDespesa = async () => {
     if (!user) return alertError("É necessário estar logado.");
     if (viagem?.criadoPor !== user.uid)
-      return alertError("Somente o criador da viagem pode adicionar contas.");
+      return alertError("Somente o criador da viagem pode adicionar despesas.");
     if (!titulo.trim() || !valor || valor <= 0)
       return alertError("Preencha título e valor corretamente.");
 
-    await addDoc(collection(db, `viagens/${viagemId}/contas`), {
+    await addDoc(collection(db, `viagens/${viagemId}/despesas`), {
       titulo: titulo.trim(),
       descricao: "",
       valorTotal: Number(valor),
@@ -82,10 +82,10 @@ export default function ViagemDetalhes() {
 
     setTitulo("");
     setValor(0);
-    Swal.fire("Sucesso!", "Conta criada com sucesso!", "success");
+    Swal.fire("Sucesso!", "Despesa criada com sucesso!", "success");
   };
 
-  const abrirPagamento = async (conta: any) => {
+  const abrirPagamento = async (despesa: any) => {
     const { value: amount } = await Swal.fire({
       title: "Valor a pagar",
       input: "number",
@@ -102,7 +102,7 @@ export default function ViagemDetalhes() {
       return Swal.fire("Erro", "Informe um valor válido", "error");
 
     try {
-      await runTransactionOperation(conta, num);
+      await runTransactionOperation(despesa, num);
       Swal.fire("Sucesso!", "Pagamento registrado", "success");
     } catch (e: any) {
       console.error(e);
@@ -110,17 +110,17 @@ export default function ViagemDetalhes() {
     }
   };
 
-  const runTransactionOperation = async (conta: any, amount: number) => {
-    const contaRef = doc(db, `viagens/${viagemId}/contas/${conta.id}`);
+  const runTransactionOperation = async (despesa: any, amount: number) => {
+    const despesaRef = doc(db, `viagens/${viagemId}/despesas/${despesa.id}`);
     const pagamentosCol = collection(
       db,
-      `viagens/${viagemId}/contas/${conta.id}/pagamentos`
+      `viagens/${viagemId}/despesas/${despesa.id}/pagamentos`
     );
     const pagamentoRef = doc(pagamentosCol);
 
     await runTransaction(db, async (t) => {
-      const snap = await t.get(contaRef);
-      if (!snap.exists()) throw new Error("Conta não encontrada");
+      const snap = await t.get(despesaRef);
+      if (!snap.exists()) throw new Error("Despesa não encontrada");
 
       const data: any = snap.data();
       const atualPago = Number(data.valorPago || 0);
@@ -139,8 +139,8 @@ export default function ViagemDetalhes() {
         data: serverTimestamp(),
       });
 
-      // atualizar conta
-      t.update(contaRef, {
+      // atualizar despesa
+      t.update(despesaRef, {
         valorPago: novoPago,
         status: novoStatus,
         atualizadoEm: serverTimestamp(),
@@ -169,35 +169,77 @@ export default function ViagemDetalhes() {
   const ehCriador = user && viagem?.criadoPor === user.uid;
 
   return (
-    <div className="card p-4 shadow-lg border-0">
-      <div className="d-flex align-items-center mb-3 border-bottom pb-3">
-        <FaRoute className="text-primary me-3" size={30} />
-        <div>
-          <h3 className="mb-0 text-dark">
-            Viagem: {viagem?.nome.toUpperCase() ?? "---"}
-          </h3>
-          {viagem && (
-            <div
-              className="text-muted d-flex align-items-center"
-              style={{ fontSize: 14 }}
-            >
-              <FaUserCircle className="me-1" />
-              Criado por: {viagem.nomeCriador ?? "---"}
+    <div className="card p-4 shadow-lg border-1">
+      <div className="border-1 p-4 mb-4">
+        <div className="d-flex align-items-start">
+          {/* 1. Ícone Grande e Destacado */}
+          <FaRoute className="text-primary me-4 mt-1 flex-shrink-0" size={30} />
+
+          {/* 2. Bloco de Informações */}
+          <div className="flex-grow-1">
+            {/* Título Principal */}
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <h2 className="fw-bold text-dark mb-0">
+                {viagem?.nome?.toUpperCase() ?? "Nova Viagem"}
+              </h2>
+
+              {/* Código de Acesso (Destaque) */}
+              {viagem?.codigo && (
+                <span
+                  className="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold p-2 text-uppercase"
+                  style={{ fontSize: "0.9em" }}
+                >
+                  Código: {viagem.codigo}
+                </span>
+              )}
             </div>
-          )}
+
+            <hr className="my-2" />
+
+            {/* 3. Descrição e Orçamento (Grid de Informações) */}
+            <div className="row g-2 text-muted">
+              {viagem?.orcamentoInicial && (
+                <div className="col-md-6 d-flex align-items-center">
+                  <FaMoneyBillWave className="me-2 text-success" />
+                  <span className="fw-semibold text-success">
+                    Orçamento Inicial:
+                  </span>
+                  <span className="ms-1 text-success">
+                    {formatarMoeda(viagem?.orcamentoInicial)}
+                  </span>
+                </div>
+              )}
+
+              {/* Criador */}
+              {viagem && (
+                <div className="col-md-6 d-flex align-items-center justify-content-md-end">
+                  <FaUserCircle className="me-1" />
+                  <small>Criado por: {viagem.nomeCriador ?? "---"}</small>
+                </div>
+              )}
+
+              {/* Descrição */}
+              <div className="col-md-12 d-flex align-items-left text-truncate">
+                <FaInfoCircle className="me-2" />{" "}
+                <small>
+                  {viagem?.descricao ? `${viagem.descricao}` : "Sem descrição."}
+                </small>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 2. FORMULÁRIO DE NOVA CONTA (Apenas para o Criador) */}
+      {/* 2. FORMULÁRIO DE NOVA DESPESA (Apenas para o Criador) */}
       {ehCriador && (
         <div className="mb-4 p-3 bg-light rounded shadow-sm">
           <h5 className="mb-3 text-secondary">
-            <FaPlusCircle className="me-2" /> Adicionar Nova Conta
+            <FaPlusCircle className="me-2" /> Adicionar Nova Despesa
           </h5>
           <div className="d-flex gap-2">
             <input
               className="form-control"
-              placeholder="Título da conta (Ex: Gasolina, Feira...)"
+              placeholder="Título da Despesa (Ex: Gasolina, Feira...)"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
             />
@@ -213,8 +255,8 @@ export default function ViagemDetalhes() {
               onValueChange={(value) => setValor(Number(value))}
             />
             <button
-              className="btn btn-primary text-nowrap"
-              onClick={criarConta}
+              className="btn btn-success text-nowrap"
+              onClick={criarDespesa}
             >
               Adicionar
             </button>
@@ -223,17 +265,17 @@ export default function ViagemDetalhes() {
       )}
 
       <h4 className="mt-2 mb-3 border-bottom pb-2 text-secondary">
-        Contas e Pagamentos
+        Despesas e Pagamentos
       </h4>
 
-      <div className="accordion" id="contasPagamentosAccordion">
-        {contas.length === 0 && (
+      <div className="accordion" id="despesasPagamentosAccordion">
+        {despesas.length === 0 && (
           <div className="alert alert-info text-center">
-            Nenhuma conta registrada.
+            Nenhuma despesa registrada.
           </div>
         )}
 
-        {contas.map((c) => {
+        {despesas.map((c) => {
           const statusInfo = statusMap[c.status] || statusMap.aberta;
 
           return (
@@ -251,10 +293,8 @@ export default function ViagemDetalhes() {
                 >
                   <div className="d-flex align-items-center flex-grow-1 me-3">
                     <div className="d-flex flex-column align-items-start me-4 flex-shrink-0">
-                      {" "}
-                      {/* flex-shrink-0 evita que encolha demais */}
                       <strong
-                        className="h5 mb-1 text-dark text-truncate"
+                        className="h5 mb-2 pb-1 text-dark text-truncate"
                         style={{ maxWidth: "180px" }}
                       >
                         {c.titulo}
@@ -268,7 +308,7 @@ export default function ViagemDetalhes() {
                       <div className="text-dark">
                         **Total: R$ {Number(c.valorTotal).toFixed(2)}**
                       </div>
-                      <div className="text-muted" style={{ fontSize: 13 }}>
+                      <div className="text-muted mt-1" style={{ fontSize: 13 }}>
                         Pago: R$ {Number(c.valorPago || 0).toFixed(2)}
                       </div>
                     </div>
@@ -301,13 +341,13 @@ export default function ViagemDetalhes() {
                 id={`collapse-${c.id}`}
                 className="accordion-collapse collapse"
                 aria-labelledby={`heading-${c.id}`}
-                data-bs-parent="#contasPagamentosAccordion"
+                data-bs-parent="#despesasPagamentosAccordion"
               >
                 <div className="accordion-body p-3 bg-light">
                   <h6 className="mb-3 text-secondary border-bottom pb-1">
                     Pagamentos Registrados para {c.titulo}
                   </h6>
-                  <PagamentosList viagemId={viagemId} contaId={c.id} />
+                  <PagamentosList viagemId={viagemId} despesaId={c.id} />
                 </div>
               </div>
             </div>
@@ -320,21 +360,21 @@ export default function ViagemDetalhes() {
 
 function PagamentosList({
   viagemId,
-  contaId,
+  despesaId,
 }: {
   viagemId: string;
-  contaId: string;
+  despesaId: string;
 }) {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
     const q = query(
-      collection(db, `viagens/${viagemId}/contas/${contaId}/pagamentos`)
+      collection(db, `viagens/${viagemId}/despesas/${despesaId}/pagamentos`)
     );
     const unsub = onSnapshot(q, (snap) =>
       setItems(snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })))
     );
     return () => unsub();
-  }, [viagemId, contaId]);
+  }, [viagemId, despesaId]);
 
   return (
     <div className="list-group">

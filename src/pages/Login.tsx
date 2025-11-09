@@ -114,7 +114,7 @@ export default function Login() {
             Bem-vindo ao <span className="text-primary">OxeViajei</span>
           </h4>
           <p className="text-muted">
-            Organize viagens, contas e registre pagamentos em equipe de forma
+            Organize viagens, despesas e registre pagamentos em equipe de forma
             simples e prática.
           </p>
         </div>
